@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Календарь беременности</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .pregnancy-info {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .info-card {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .info-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        .info-card .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .week-progress {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        .progress-bar-container {
+            background: #e0e0e0;
+            border-radius: 25px;
+            height: 40px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-weight: bold;
+        }
+        .week-markers {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        .calendar-grid {
+            padding: 30px;
+        }
+        .week-section {
+            margin-bottom: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .week-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .week-header:hover {
+            background: #e9ecef;
+        }
+        .week-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .week-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .events-list {
+            padding: 20px;
+            display: none;
+            background: white;
+        }
+        .week-section.expanded .events-list {
+            display: block;
+        }
+        .event-card {
+            background: white;
+            border-left: 4px solid;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .event-card:hover {
+            transform: translateX(5px);
+        }
+        .event-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .status-upcoming {
+            background: #ffd93d;
+            color: #8b6b00;
+        }
+        .status-completed {
+            background: #6bcf7f;
+            color: #1e5c2e;
+        }
+        .status-overdue {
+            background: #ff6b6b;
+            color: #8b0000;
+        }
+        .critical-badge {
+            background: #ff4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-left: 10px;
+        }
+        .event-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .event-details {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .event-details span {
+            margin-right: 15px;
+        }
+        .warning-message {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        .action-message {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        .event-actions {
+            margin-top: 10px;
+        }
+        .btn-complete {
+            background: #6bcf7f;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-health {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 20px;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        .doctor-group {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .doctor-group label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        .health-question {
+            margin: 20px 0;
+        }
+        .health-question label {
+            margin-right: 20px;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .pregnancy-info {
+                flex-direction: column;
+            }
+            .info-card {
+                text-align: center;
+            }
+            .calendar-grid {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Календарь беременности</h1>
+            <div class="pregnancy-info" id="pregnancyInfo">
+                <div class="info-card"><h3>Текущая неделя</h3><div class="value" id="currentWeek">-</div></div>
+                <div class="info-card"><h3>Триместр</h3><div class="value" id="trimester">-</div></div>
+                <div class="info-card"><h3>До родов примерно</h3><div class="value" id="daysLeft">-</div></div>
+                <div class="info-card"><h3>ПДР</h3><div class="value" id="dueDate">-</div></div>
+            </div>
+        </div>
+        <div class="week-progress">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+            <div class="week-markers" id="weekMarkers"></div>
+        </div>
+        <div class="calendar-grid">
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background:#ffd93d"></div><span>Скоро</span></div>
+                <div class="legend-item"><div class="legend-color" style="background:#6bcf7f"></div><span>Выполнено</span></div>
+                <div class="legend-item"><div class="legend-color" style="background:#ff6b6b"></div><span>Просрочено</span></div>
+                <div class="legend-item"><div class="legend-color" style="background:#ff4444"></div><span>Критическое</span></div>
+            </div>
+            <button class="btn-health" onclick="openHealthModal()">Мои проблемы со здоровьем</button>
+            <div id="eventsContainer"></div>
+        </div>
+    </div>
+    <div id="healthModal" class="modal">
+        <div class="modal-content">
+            <h2>Проблемы со здоровьем</h2>
+            <div class="health-question">
+                <label><input type="radio" name="has_issues" value="no" checked> Нет проблем</label>
+                <label><input type="radio" name="has_issues" value="yes"> Есть проблемы</label>
+            </div>
+            <div id="healthIssuesList" style="display:none;">
+                <h3>Выберите ваши проблемы:</h3>
+                <div id="issuesContainer"></div>
+                <p style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 8px;">
+                    Не нашли своего врача или если у вас серьезные проблемы со здоровьем?<br>
+                    Вы получите направление к <strong>врачу-перинатологу</strong>.
+                </p>
+            </div>
+            <button onclick="saveHealthIssues()" class="btn-complete" style="margin-top: 20px;">Сохранить</button>
+            <button onclick="closeHealthModal()" class="btn-delete">Отмена</button>
+        </div>
+    </div>
+    <script>
+        let currentWeek = 0;
+        let allIssues = [];
+        async function loadPregnancyInfo() {
+            const response = await fetch('/api/user/profile');
+            const data = await response.json();
+            currentWeek = data.current_week;
+
+            document.getElementById('currentWeek').textContent = `${data.current_week} неделя`;
+            document.getElementById('trimester').textContent = `${data.trimester} триместр`;
+            document.getElementById('daysLeft').textContent = `${data.days_left} дней`;
+            document.getElementById('dueDate').textContent = data.due_date;
+
+            const percent = (data.current_week / 40) * 100;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('progressBar').textContent = `${Math.round(percent)}%`;
+
+            const markers = document.getElementById('weekMarkers');
+            markers.innerHTML = '';
+            for (let i = 0; i <= 40; i += 5) {
+                const m = document.createElement('div');
+                m.textContent = `${i}н`;
+                markers.appendChild(m);
+            }
+        }
+
+        async function loadEvents() {
+            const response = await fetch('/api/events');
+            const data = await response.json();
+
+            const container = document.getElementById('eventsContainer');
+            container.innerHTML = '';
+
+            const weeks = Object.keys(data.events_by_week).sort((a,b) => a - b);
+
+            for (let week of weeks) {
+                const events = data.events_by_week[week];
+                const weekNum = parseInt(week);
+                const isCurrentWeek = weekNum === currentWeek;
+
+                const section = document.createElement('div');
+                section.className = 'week-section';
+                if (isCurrentWeek) section.classList.add('expanded');
+
+                const header = document.createElement('div');
+                header.className = 'week-header';
+                header.onclick = () => section.classList.toggle('expanded');
+                header.innerHTML = `
+                    <div class="week-number">${weekNum} неделя ${isCurrentWeek ? 'Текущая' : ''}</div>
+                    <div class="week-badge">${events.length} событий</div>
+                `;
+                const list = document.createElement('div');
+                list.className = 'events-list';
+                for (let event of events) {
+                    list.appendChild(createEventCard(event));
+                }
+                section.appendChild(header);
+                section.appendChild(list);
+                container.appendChild(section);
+            }
+        }
+        function createEventCard(event) {
+            const card = document.createElement('div');
+            card.className = 'event-card';
+            let borderColor = '#ffd93d';
+            let statusClass = 'status-upcoming';
+            if (event.status === 'выполнено') {
+                borderColor = '#6bcf7f';
+                statusClass = 'status-completed';
+            } else if (event.status === 'просрочено') {
+                borderColor = '#ff6b6b';
+                statusClass = 'status-overdue';
+            }
+
+            card.style.borderLeftColor = borderColor;
+
+            let html = `
+                <div class="event-status ${statusClass}">${event.status}</div>
+                <div class="event-title">
+                    ${event.title}
+                    ${event.is_critical ? '<span class="critical-badge">Критично</span>' : ''}
+                </div>
+                <div class="event-details">
+                    <span>${event.date || 'Дата уточняется'}</span>
+                    <span>${event.event_type}</span>
+                    ${event.deadline_week ? `<span> Дедлайн: ${event.deadline_week} недель</span>` : ''}
+                </div>
+            `;
+
+            if (event.description) {
+                html += `<div class="event-details">${event.description}</div>`;
+            }
+
+            if (event.warning_message) {
+                html += `<div class="warning-message">${event.warning_message}</div>`;
+            }
+
+            if (event.action_message) {
+                html += `<div class="action-message">${event.action_message}</div>`;
+            }
+
+            if (!event.completed && event.status !== 'выполнено') {
+                html += `
+                    <div class="event-actions">
+                        <button class="btn-complete" onclick="markComplete(${event.id})">Отметить</button>
+                        <button class="btn-delete" onclick="deleteEvent(${event.id})">Удалить</button>
+                    </div>
+                `;
+            } else if (event.completed) {
+                html += `<div class="event-details">Выполнено</div>`;
+            }
+            card.innerHTML = html;
+            return card;
+        }
+        async function markComplete(eventId) {
+            await fetch(`/api/events/${eventId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({completed: true})
+            });
+            await loadEvents();
+        }
+
+        async function deleteEvent(eventId) {
+            if (confirm('Удалить событие?')) {
+                await fetch(`/api/events/${eventId}`, {method: 'DELETE'});
+                await loadEvents();
+            }
+        }
+        async function loadHealthIssuesList() {
+            const response = await fetch('/api/health-issues');
+            const data = await response.json();
+            allIssues = data.issues;
+
+            const container = document.getElementById('issuesContainer');
+            container.innerHTML = '';
+
+            const grouped = {};
+            allIssues.forEach(issue => {
+                if (!grouped[issue.doctor]) grouped[issue.doctor] = [];
+                grouped[issue.doctor].push(issue);
+            });
+
+            for (const [doctor, issues] of Object.entries(grouped)) {
+                const group = document.createElement('div');
+                group.className = 'doctor-group';
+                group.innerHTML = `<strong>${doctor}:</strong>`;
+                issues.forEach(issue => {
+                    const label = document.createElement('label');
+                    label.innerHTML = `<input type="checkbox" value="${issue.name}"> ${issue.name}`;
+                    group.appendChild(label);
+                });
+                container.appendChild(group);
+            }
+        }
+
+        function openHealthModal() {
+            document.getElementById('healthModal').style.display = 'block';
+            loadHealthIssuesList();
+
+            fetch('/api/user/profile')
+                .then(r => r.json())
+                .then(data => {
+                    const hasIssues = data.has_health_issues;
+                    document.querySelector(`input[name="has_issues"][value="${hasIssues ? 'yes' : 'no'}"]`).checked = true;
+                    document.getElementById('healthIssuesList').style.display = hasIssues ? 'block' : 'none';
+
+                    if (hasIssues && data.health_conditions) {
+                        const checkboxes = document.querySelectorAll('#issuesContainer input');
+                        checkboxes.forEach(cb => {
+                            if (data.health_conditions.includes(cb.value)) {
+                                cb.checked = true;
+                            }
+                        });
+                    }
+                });
+        }
+
+        function closeHealthModal() {
+            document.getElementById('healthModal').style.display = 'none';
+        }
+
+        async function saveHealthIssues() {
+            const hasIssues = document.querySelector('input[name="has_issues"]:checked').value === 'yes';
+            const conditions = [];
+
+            if (hasIssues) {
+                const checkboxes = document.querySelectorAll('#issuesContainer input:checked');
+                checkboxes.forEach(cb => conditions.push(cb.value));
+            }
+
+            await fetch('/api/user/health', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    has_issues: hasIssues,
+                    conditions: conditions
+                })
+            });
+
+            closeHealthModal();
+            await loadEvents();
+            alert('Настройки сохранены! События обновлены.');
+        }
+
+        async function init() {
+            await loadPregnancyInfo();
+            await loadEvents();
+        }
+
+        init();
+    </script>
+</body>
+</html>
