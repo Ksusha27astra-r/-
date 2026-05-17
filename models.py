@@ -63,7 +63,7 @@ class Pregnancyevent(db.Model):
     warning_message = db.Column(db.Text, nullable=True)
     action_message = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    user = db.relationship('UserProfile', backref='events')
+    user = db.relationship('Userprofile', backref='events')
     def get_status(self, current_week):
         if self.is_completed:
             return Eventstat.vip.value

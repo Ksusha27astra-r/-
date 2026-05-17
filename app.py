@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session
 from datetime import datetime, timedelta, date
 from models import db, Userprofile, Pregnancyevent, Eventgenerator, listdoctors
 import json
@@ -48,7 +48,6 @@ def index():
 
 @app.route('/api/user/profile')
 def get_user_profile():
-    """Получить профиль пользователя"""
     user = Userprofile.query.first()
     if user:
         current_week = user.calculate_current_week()
@@ -162,4 +161,4 @@ def get_critical_warnings():
     return jsonify({'warnings': warnings})
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
